@@ -25,4 +25,41 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Feed items table for storing aggregated content from various sources.
+ * Includes articles, tweets, GitHub repos, and AI tools.
+ */
+export const feedItems = mysqlTable("feedItems", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Unique identifier for the item (usually from source) */
+  sourceId: varchar("sourceId", { length: 255 }).notNull().unique(),
+  /** Type of content: 'article', 'tweet', 'github', 'ai_tool' */
+  type: mysqlEnum("type", ["article", "tweet", "github", "ai_tool"]).notNull(),
+  /** Source name: 'tds', 'arxiv', 'deeplearning', 'emergent_mind', 'github', 'ai_tools', 'twitter' */
+  source: varchar("source", { length: 64 }).notNull(),
+  /** Article/tweet title */
+  title: text("title").notNull(),
+  /** Brief description or excerpt */
+  description: text("description"),
+  /** Full content (if available) */
+  content: text("content"),
+  /** Author/creator name */
+  author: varchar("author", { length: 255 }),
+  /** Link to original content */
+  url: varchar("url", { length: 2048 }).notNull(),
+  /** Publication/creation date */
+  publishedAt: timestamp("publishedAt").notNull(),
+  /** Image/thumbnail URL */
+  imageUrl: varchar("imageUrl", { length: 2048 }),
+  /** Tags/categories (JSON array) */
+  tags: text("tags"),
+  /** Engagement metrics (for tweets: likes, retweets, etc.) */
+  metrics: text("metrics"),
+  /** When this item was added to our database */
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  /** Last time this item was updated */
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type FeedItem = typeof feedItems.$inferSelect;
+export type InsertFeedItem = typeof feedItems.$inferInsert;

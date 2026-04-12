@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, desc, sql, count } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, feedItems, InsertFeedItem } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -87,6 +87,90 @@ export async function getUserByOpenId(openId: string) {
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getFeedItems(limit: number = 50, offset: number = 0, filters?: { type?: string; source?: string; search?: string }) {
+  const db = await getDb();
+  if (!db) return [];
+
+  let query: any = db.select().from(feedItems);
+
+  if (filters?.type) {
+    query = query.where(eq(feedItems.type, filters.type as any));
+  }
+
+  if (filters?.source) {
+    query = query.where(eq(feedItems.source, filters.source));
+  }
+
+  if (filters?.search) {
+    const searchTerm = `%${filters.search}%`;
+    query = query.where(
+      sql`${feedItems.title} LIKE ${searchTerm} OR ${feedItems.description} LIKE ${searchTerm}`
+    );
+  }
+
+  const result = await query
+    .orderBy(desc(feedItems.publishedAt))
+    .limit(limit)
+    .offset(offset);
+
+  return result;
+}
+
+export async function upsertFeedItem(item: InsertFeedItem): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+
+  try {
+    await db.insert(feedItems).values(item).onDuplicateKeyUpdate({
+      set: {
+        title: item.title,
+        description: item.description,
+        content: item.content,
+        author: item.author,
+        imageUrl: item.imageUrl,
+        tags: item.tags,
+        metrics: item.metrics,
+        updatedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error("[Database] Failed to upsert feed item:", error);
+    throw error;
+  }
+}
+
+export async function getFeedItemsBySource(source: string, limit: number = 20) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const result = await db
+    .select()
+    .from(feedItems)
+    .where(eq(feedItems.source, source))
+    .orderBy(desc(feedItems.publishedAt))
+    .limit(limit);
+
+  return result;
+}
+
+export async function getFeedItemCount(filters?: { type?: string; source?: string }) {
+  const db = await getDb();
+  if (!db) return 0;
+
+  let query: any = db.select({ count: count() }).from(feedItems);
+
+  if (filters?.type) {
+    query = query.where(eq(feedItems.type, filters.type as any));
+  }
+
+  if (filters?.source) {
+    query = query.where(eq(feedItems.source, filters.source));
+  }
+
+  const result = await query;
+  return result[0]?.count || 0;
 }
 
 // TODO: add feature queries here as your schema grows.
