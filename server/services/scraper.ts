@@ -53,50 +53,10 @@ export async function scrapeGitHubTrending(): Promise<InsertFeedItem[]> {
   }
 }
 
+// DISABLED: AI Tools scraper - no content available from theresanaiforthat.com
 export async function scrapeThereIsAnAIForThat(): Promise<InsertFeedItem[]> {
-  try {
-    const response = await axiosInstance.get("https://theresanaiforthat.com/");
-    const $ = cheerio.load(response.data);
-    const items: InsertFeedItem[] = [];
-
-    // Scrape AI tools from the page
-    $("div[data-testid='tool-card'], div.tool-card, a[href*='/ai/']").each((index, element) => {
-      if (items.length >= 20) return; // Limit to 20 items
-
-      const $elem = $(element);
-      const titleElem = $elem.find("h3, h2, [data-testid='tool-name']").first();
-      const title = titleElem.text().trim();
-      const descriptionElem = $elem.find("p, [data-testid='tool-description']").first();
-      const description = descriptionElem.text().trim();
-      const linkElem = $elem.find("a[href]").first();
-      const href = linkElem.attr("href") || $elem.attr("href") || "";
-
-      if (!title || !href) return;
-
-      const fullUrl = href.startsWith("http") ? href : `https://theresanaiforthat.com${href}`;
-      const sourceId = `ai_tools-${href}`;
-
-      items.push({
-        sourceId,
-        type: "ai_tool",
-        source: "ai_tools",
-        title: title,
-        description: description || "AI-powered tool",
-        content: description || "",
-        author: "There's An AI For That",
-        url: fullUrl,
-        publishedAt: new Date(),
-        imageUrl: null,
-        tags: JSON.stringify(["ai", "tool"]),
-        metrics: null,
-      });
-    });
-
-    return items;
-  } catch (error) {
-    console.error("[Scraper] Error scraping There's An AI For That:", error);
-    return [];
-  }
+  console.log("[Scraper] AI Tools scraper disabled - returning empty array");
+  return [];
 }
 
 export async function scrapeTechXplore(): Promise<InsertFeedItem[]> {

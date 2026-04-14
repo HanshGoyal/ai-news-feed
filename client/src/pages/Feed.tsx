@@ -118,12 +118,11 @@ export default function Feed() {
       <main className="container mx-auto px-4 py-8">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="all">All</TabsTrigger>
             <TabsTrigger value="article">Articles</TabsTrigger>
             <TabsTrigger value="tweet">Twitter/X</TabsTrigger>
             <TabsTrigger value="github">GitHub</TabsTrigger>
-            <TabsTrigger value="ai_tool">AI Tools</TabsTrigger>
           </TabsList>
 
           <TabsContent value={activeTab} className="space-y-4 mt-6">
