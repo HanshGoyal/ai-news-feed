@@ -45,11 +45,11 @@
 - [x] @bilawalsidhu
 
 ### Testing & Deployment
-- [ ] Write unit tests for data fetching and parsing
-- [ ] Test feed display and filtering functionality
-- [ ] Responsive design testing (mobile/tablet/desktop)
-- [ ] Deploy to public URL
-- [ ] Set up monitoring for feed refresh health
+- [x] Write unit tests for data fetching and parsing
+- [x] Test feed display and filtering functionality
+- [x] Responsive design testing (mobile/tablet/desktop)
+- [x] Deploy to public URL
+- [x] Set up monitoring for feed refresh health
 
 ## Implementation Notes
 - Backend services use RSS parser, Cheerio for web scraping, and Nitter proxy for Twitter
